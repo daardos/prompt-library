@@ -6,164 +6,319 @@
     <title>Prompt Hub | My Library</title>
     <style>
         :root {
-            --bg: #0f172a;
-            --card-bg: #1e293b;
+            --bg: #020617; 
+            --card-bg: rgba(30, 41, 59, 0.7);
             --text: #f8fafc;
             --accent: #38bdf8;
-            --accent-glow: rgba(56, 189, 248, 0.2);
+            --accent-glow: rgba(56, 189, 248, 0.3);
             --success: #10b981;
+            --border: rgba(51, 65, 85, 0.5);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        /* Красивый скроллбар */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
         body {
-            font-family: 'Inter', -apple-system, sans-serif;
+            font-family: 'Inter', -apple-system, system-ui, sans-serif;
             background-color: var(--bg);
             color: var(--text);
             margin: 0;
             line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Фоновая сетка и сферы (GitHub Style) */
+        .bg-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background-image: 
+                linear-gradient(var(--border) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 50px 50px;
+            mask-image: radial-gradient(ellipse at center, black, transparent 85%);
+            opacity: 0.15;
+        }
+
+        body::before, body::after {
+            content: "";
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: -2;
+            opacity: 0.1;
+            animation: float 25s infinite alternate;
+        }
+        body::before { background: var(--accent); top: -150px; right: -100px; }
+        body::after { background: #6366f1; bottom: -150px; left: -100px; animation-delay: -12s; }
+
+        @keyframes float {
+            from { transform: translate(0, 0); }
+            to { transform: translate(100px, 80px); }
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 0 auto;
-            padding: 40px 20px;
+            padding: 60px 20px;
+            position: relative;
         }
 
-        header { text-align: center; margin-bottom: 50px; }
-        h1 { font-size: 3rem; margin: 0; color: var(--accent); text-shadow: 0 0 20px var(--accent-glow); }
-        header p { opacity: 0.7; font-size: 1.1rem; }
+        header { text-align: center; margin-bottom: 60px; }
+        h1 { 
+         font-size: clamp(2.5rem, 8vw, 4rem); 
+         margin: 0; 
+         font-weight: 800;
+         letter-spacing: -2px;
+         /* Эффект переливающегося текста */
+         background: linear-gradient(
+                120deg, 
+                #38bdf8, /* Голубой */
+                #818cf8, /* Сиреневый */
+                #c084fc, /* Пурпурный */
+                #38bdf8  /* Снова голубой для зацикливания */
+            );
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
 
-        /* Поиск и Фильтры */
+            animation: gradient-flow 4s linear infinite;
+            filter: drop-shadow(0 0 20px var(--accent-glow));
+        }
+
+        @keyframes gradient-flow {
+            to { background-position: 200% center; }
+        }
+        header p { opacity: 0.6; font-size: 1.2rem; margin-top: 10px; }
+
+        /* Панель управления */
         .controls {
             background: var(--card-bg);
-            padding: 25px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            margin-bottom: 40px;
-            border: 1px solid #334155;
+            backdrop-filter: blur(12px);
+            padding: 35px;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            margin-bottom: 50px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         #search {
             width: 100%;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #334155;
-            background: var(--bg);
+            padding: 16px 22px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: rgba(15, 23, 42, 0.8);
             color: white;
-            font-size: 1rem;
-            margin-bottom: 20px;
+            font-size: 1.1rem;
+            margin-bottom: 25px;
             box-sizing: border-box;
+            transition: var(--transition);
             outline: none;
         }
-        #search:focus { border-color: var(--accent); }
-
-        .filters { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-        .filter-btn {
-            padding: 8px 18px;
-            border-radius: 30px;
-            border: 1px solid var(--accent);
-            background: transparent;
-            color: var(--accent);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 0.9rem;
+        #search:focus { 
+            border-color: var(--accent); 
+            box-shadow: 0 0 0 4px var(--accent-glow);
+            background: #0f172a;
         }
-        .filter-btn.active, .filter-btn:hover { background: var(--accent); color: var(--bg); font-weight: bold; }
 
-        /* Сетка промтов */
+        .filters { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .filter-btn {
+            padding: 10px 24px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.03);
+            color: #94a3b8;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        .filter-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(56, 189, 248, 0.05); }
+        .filter-btn.active { 
+            background: var(--accent); 
+            color: var(--bg); 
+            border-color: var(--accent);
+            box-shadow: 0 10px 20px -5px var(--accent-glow);
+        }
+
+        /* Карточки */
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
         }
 
         .card {
             background: var(--card-bg);
-            border-radius: 12px;
-            padding: 20px;
-            border: 1px solid #334155;
-            transition: transform 0.3s ease, border-color 0.3s;
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: var(--transition);
             display: flex;
             flex-direction: column;
+            animation: cardAppear 0.5s ease backwards;
         }
-        .card:hover { transform: translateY(-5px); border-color: var(--accent); }
+        @keyframes cardAppear {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-        .card-tag { font-size: 0.7rem; text-transform: uppercase; color: var(--accent); letter-spacing: 1px; font-weight: 800; }
-        .card-title { font-size: 1.2rem; margin: 10px 0; font-weight: 600; color: #fff; }
+        .card:hover { 
+            transform: translateY(-10px); 
+            border-color: var(--accent);
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
+            background: rgba(30, 41, 59, 0.9);
+        }
+
+        .card-tag { 
+            font-size: 0.65rem; 
+            text-transform: uppercase; 
+            color: var(--accent); 
+            letter-spacing: 2px; 
+            font-weight: 900;
+            margin-bottom: 12px;
+            display: inline-block;
+            border-bottom: 2px solid var(--accent);
+        }
+        .card-title { font-size: 1.4rem; margin-bottom: 15px; font-weight: 700; color: #fff; }
+        
         .card-text { 
-            background: #0f172a; 
-            padding: 12px; 
-            border-radius: 6px; 
-            font-size: 0.85rem; 
-            color: #94a3b8;
-            margin-bottom: 15px;
+            background: rgba(15, 23, 42, 0.6); 
+            padding: 18px; 
+            border-radius: 12px; 
+            font-size: 0.9rem; 
+            color: #cbd5e1;
+            margin-bottom: 20px;
             flex-grow: 1;
             cursor: pointer;
-            border: 1px solid transparent;
-            overflow-wrap: break-word;
+            border: 1px solid var(--border);
+            transition: var(--transition);
+            line-height: 1.6;
+            max-height: 180px;
+            overflow-y: auto;
+            font-family: 'Fira Code', monospace; /* Моноширинный для стиля кода */
         }
-        .card-text:hover { border-color: #334155; color: #cbd5e1; }
+        .card-text:hover { border-color: #475569; background: rgba(15, 23, 42, 0.9); }
 
         .copy-btn {
-            background: var(--accent);
+            background: linear-gradient(45deg, #38bdf8, #6366f1);
+            background-size: 150% 150%;
             color: var(--bg);
             border: none;
-            padding: 10px;
-            border-radius: 6px;
-            font-weight: bold;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 800;
             cursor: pointer;
-            transition: 0.2s;
+            transition: var(--transition);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+        }
+        
+        .copy-btn:hover { 
+            background-position: right center;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px var(--accent-glow);
         }
 
-        /* Секция Заказа */
+        .copy-btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
+        .copy-btn:active { transform: translateY(0); }
+
+        /* Секция заказа */
         .order-section {
-            margin-top: 80px;
-            background: linear-gradient(145deg, #1e293b, #0f172a);
-            padding: 40px;
-            border-radius: 20px;
-            border: 1px dashed var(--accent);
+            margin-top: 100px;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(12px);
+            padding: 60px 30px;
+            border-radius: 30px;
+            border: 1px solid var(--border);
             text-align: center;
         }
-
         .order-form {
             display: flex;
             flex-direction: column;
             gap: 15px;
             max-width: 500px;
-            margin: 25px auto 0;
+            margin: 35px auto 0;
         }
-
         .order-form input, .order-form textarea {
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #334155;
-            background: var(--bg);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(15, 23, 42, 0.8);
             color: white;
-            font-family: inherit;
             outline: none;
+            transition: var(--transition);
         }
-        .order-form input:focus, .order-form textarea:focus { border-color: var(--accent); }
+        .order-form input:focus, .order-form textarea:focus { border-color: var(--accent); background: #0f172a; }
 
         .submit-btn {
             background: var(--success);
             color: white;
             border: none;
-            padding: 15px;
-            border-radius: 8px;
-            font-weight: bold;
+            padding: 18px;
+            border-radius: 12px;
+            font-weight: 700;
             cursor: pointer;
-            transition: opacity 0.2s;
+            transition: var(--transition);
+            box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.4);
         }
-        .submit-btn:hover { opacity: 0.9; }
+        .submit-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 25px -5px rgba(16, 185, 129, 0.5); }
 
-        footer { text-align: center; margin-top: 60px; opacity: 0.5; font-size: 0.8rem; }
+        footer { text-align: center; margin-top: 100px; padding-bottom: 40px; opacity: 0.3; font-size: 0.8rem; letter-spacing: 1px; }
+
+        @media (max-width: 600px) {
+            .container { padding: 30px 15px; }
+            .grid { grid-template-columns: 1fr; }
+        }
+        .order-section h2 {
+            background: linear-gradient(90deg, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2rem;
+        }
+        /* Анимация появления карточек */
+        .card {
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .card.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* Эффект пульсации для переливающегося градиента заголовка */
+        @keyframes pulse-glow {
+            0% { filter: drop-shadow(0 0 15px var(--accent-glow)); }
+            50% { filter: drop-shadow(0 0 30px var(--accent-glow)); }
+            100% { filter: drop-shadow(0 0 15px var(--accent-glow)); }
+        }
+
+        h1 {
+            animation: gradient-flow 4s linear infinite, pulse-glow 3s ease-in-out infinite;
+        }
+
     </style>
 </head>
 <body>
+<div class="bg-overlay"></div>
 
 <div class="container">
     <header>
         <h1>Prompt Hub</h1>
-        <p>Моя личная библиотека отобранных промтов</p>
     </header>
 
     <div class="controls">
@@ -221,52 +376,81 @@
             cat: "art" 
         }
     ];
+        const playClickSound = () => { // <-- Убедись, что скобка { открыта здесь!
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    
+    oscillator.type = 'sine'; 
+    oscillator.frequency.setValueAtTime(800, audioCtx.currentTime); 
+    oscillator.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
+
+    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    oscillator.start();
+    oscillator.stop(audioCtx.currentTime + 0.1);
+    }; // <-- И закрыта здесь (у тебя она на 402 строке)
 
     const grid = document.getElementById('grid');
     const searchInput = document.getElementById('search');
     const filterBtns = document.querySelectorAll('.filter-btn');
 
     function render() {
-        const query = searchInput.value.toLowerCase();
-        const activeCat = document.querySelector('.filter-btn.active').dataset.cat;
+    const query = searchInput.value.toLowerCase();
+    const activeCat = document.querySelector('.filter-btn.active').dataset.cat;
 
-        grid.innerHTML = '';
+    grid.innerHTML = '';
 
-        const filtered = prompts.filter(p => {
-            const matchesSearch = p.title.toLowerCase().includes(query) || p.text.toLowerCase().includes(query);
-            const matchesCat = activeCat === 'all' || p.cat === activeCat;
-            return matchesSearch && matchesCat;
-        });
+    const filtered = prompts.filter(p => {
+        const matchesSearch = p.title.toLowerCase().includes(query) || p.text.toLowerCase().includes(query);
+        const matchesCat = activeCat === 'all' || p.cat === activeCat;
+        return matchesSearch && matchesCat;
+    });
 
-        filtered.forEach(p => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `
-                <span class="card-tag">${p.cat}</span>
-                <div class="card-title">${p.title}</div>
-                <div class="card-text" title="Нажми, чтобы скопировать">${p.text}</div>
-                <button class="copy-btn">Копировать</button>
-            `;
+    filtered.forEach((p, index) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+            <span class="card-tag">${p.cat}</span>
+            <div class="card-title">${p.title}</div>
+            <div class="card-text" title="Нажми, чтобы скопировать">${p.text}</div>
+            <button class="copy-btn">Копировать</button>
+        `;
 
-            const btn = card.querySelector('.copy-btn');
-            const textZone = card.querySelector('.card-text');
-            
-            const copyHandler = () => {
-                navigator.clipboard.writeText(p.text);
-                btn.innerText = 'Скопировано!';
-                btn.style.background = 'var(--success)';
-                setTimeout(() => {
-                    btn.innerText = 'Копировать';
-                    btn.style.background = 'var(--accent)';
-                }, 1500);
-            };
+        // Логика копирования (оставляем твою)
+        const btn = card.querySelector('.copy-btn');
+        const textZone = card.querySelector('.card-text');
+        const copyHandler = () => {
+            navigator.clipboard.writeText(p.text);
+            btn.innerText = 'Скопировано!';
+            btn.style.background = 'var(--success)';
+            setTimeout(() => {
+                btn.innerText = 'Копировать';
+                btn.style.background = 'var(--accent)';
+            }, 1500);
+        };
 
-            btn.addEventListener('click', copyHandler);
-            textZone.addEventListener('click', copyHandler);
+        btn.addEventListener('click', copyHandler);
+        textZone.addEventListener('click', copyHandler);
 
-            grid.appendChild(card);
-        });
-    }
+        grid.appendChild(card);
+
+        // Магия появления: каждая следующая карточка чуть позже предыдущей
+        setTimeout(() => {
+            card.classList.add('show');
+        }, index * 50); // 50мс — идеальный интервал для «каскада»
+    });
+}
+
 
     searchInput.addEventListener('input', render);
     filterBtns.forEach(btn => {
@@ -276,6 +460,20 @@
             render();
         });
     });
+    const copyHandler = () => {
+        playClickSound(); // <-- Добавляем звук здесь!
+        navigator.clipboard.writeText(p.text);
+        btn.innerText = 'Скопировано!';
+        btn.style.background = 'var(--success)';
+
+        // Добавим легкую вибрацию на телефонах (если поддерживается)
+        if (navigator.vibrate) navigator.vibrate(20);
+
+        setTimeout(() => {
+            btn.innerText = 'Копировать';
+            btn.style.background = 'var(--accent)';
+        }, 1500);
+    };
 
     render();
 </script>
