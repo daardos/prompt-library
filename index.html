@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Hub | My Library</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f8fafc;
+            --accent: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.2);
+            --success: #10b981;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header { text-align: center; margin-bottom: 50px; }
+        h1 { font-size: 3rem; margin: 0; color: var(--accent); text-shadow: 0 0 20px var(--accent-glow); }
+        header p { opacity: 0.7; font-size: 1.1rem; }
+
+        /* Поиск и Фильтры */
+        .controls {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            margin-bottom: 40px;
+            border: 1px solid #334155;
+        }
+
+        #search {
+            width: 100%;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background: var(--bg);
+            color: white;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            outline: none;
+        }
+        #search:focus { border-color: var(--accent); }
+
+        .filters { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        .filter-btn {
+            padding: 8px 18px;
+            border-radius: 30px;
+            border: 1px solid var(--accent);
+            background: transparent;
+            color: var(--accent);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+        .filter-btn.active, .filter-btn:hover { background: var(--accent); color: var(--bg); font-weight: bold; }
+
+        /* Сетка промтов */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #334155;
+            transition: transform 0.3s ease, border-color 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+        .card:hover { transform: translateY(-5px); border-color: var(--accent); }
+
+        .card-tag { font-size: 0.7rem; text-transform: uppercase; color: var(--accent); letter-spacing: 1px; font-weight: 800; }
+        .card-title { font-size: 1.2rem; margin: 10px 0; font-weight: 600; color: #fff; }
+        .card-text { 
+            background: #0f172a; 
+            padding: 12px; 
+            border-radius: 6px; 
+            font-size: 0.85rem; 
+            color: #94a3b8;
+            margin-bottom: 15px;
+            flex-grow: 1;
+            cursor: pointer;
+            border: 1px solid transparent;
+            overflow-wrap: break-word;
+        }
+        .card-text:hover { border-color: #334155; color: #cbd5e1; }
+
+        .copy-btn {
+            background: var(--accent);
+            color: var(--bg);
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        /* Секция Заказа */
+        .order-section {
+            margin-top: 80px;
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px dashed var(--accent);
+            text-align: center;
+        }
+
+        .order-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 500px;
+            margin: 25px auto 0;
+        }
+
+        .order-form input, .order-form textarea {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background: var(--bg);
+            color: white;
+            font-family: inherit;
+            outline: none;
+        }
+        .order-form input:focus, .order-form textarea:focus { border-color: var(--accent); }
+
+        .submit-btn {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .submit-btn:hover { opacity: 0.9; }
+
+        footer { text-align: center; margin-top: 60px; opacity: 0.5; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Prompt Hub</h1>
+        <p>Моя личная библиотека отобранных промтов</p>
+    </header>
+
+    <div class="controls">
+        <input type="text" id="search" placeholder="Поиск по ключевым словам...">
+        <div class="filters">
+            <button class="filter-btn active" data-cat="all">Все</button>
+            <button class="filter-btn" data-cat="code">Кодинг</button>
+            <button class="filter-btn" data-cat="art">Дизайн</button>
+            <button class="filter-btn" data-cat="text">Тексты</button>
+        </div>
+    </div>
+
+    <div class="grid" id="grid">
+        <!-- Промты генерируются через JS -->
+    </div>
+
+    <section class="order-section">
+        <h2>Нужен специфический промт?</h2>
+        <p>Отправьте запрос, и я добавлю его в коллекцию!</p>
+        
+        <!-- Твоя ссылка Formspree вставлена ниже -->
+        <form action="https://formspree.io/f/mnjonajy" method="POST" class="order-form">
+            <input type="email" name="_replyto" placeholder="Ваш email" required>
+            <textarea name="message" rows="4" placeholder="Опишите задачу для нейросети..." required></textarea>
+            <button type="submit" class="submit-btn">Отправить запрос</button>
+        </form>
+    </section>
+
+    <footer>
+        &copy; 2024 My Prompt Library. Сделано для GitHub Portfolio.
+    </footer>
+</div>
+
+<script>
+    // ТУТ ТЫ МОЖЕШЬ ДОБАВЛЯТЬ НОВЫЕ ПРОМТЫ ВРУЧНУЮ
+    const prompts = [
+        { 
+            title: "Рефакторинг JavaScript", 
+            text: "Выступи в роли Senior JS разработчика. Проанализируй этот код на предмет ошибок и предложи оптимизацию: [КОД]", 
+            cat: "code" 
+        },
+        { 
+            title: "Киберпанк Иллюстрация", 
+            text: "Cyberpunk city street, rainy night, neon signs, cinematic lighting, 8k resolution, highly detailed, unreal engine 5 render", 
+            cat: "art" 
+        },
+        { 
+            title: "Написание README", 
+            text: "Составь структуру профессионального README.md файла для проекта на тему [ТЕМА], включая разделы установки и использования.", 
+            cat: "text" 
+        },
+        { 
+            title: "Генератор логотипов", 
+            text: "Minimalist geometric logo design, vector style, flat colors, white background, high contrast", 
+            cat: "art" 
+        }
+    ];
+
+    const grid = document.getElementById('grid');
+    const searchInput = document.getElementById('search');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+
+    function render() {
+        const query = searchInput.value.toLowerCase();
+        const activeCat = document.querySelector('.filter-btn.active').dataset.cat;
+
+        grid.innerHTML = '';
+
+        const filtered = prompts.filter(p => {
+            const matchesSearch = p.title.toLowerCase().includes(query) || p.text.toLowerCase().includes(query);
+            const matchesCat = activeCat === 'all' || p.cat === activeCat;
+            return matchesSearch && matchesCat;
+        });
+
+        filtered.forEach(p => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <span class="card-tag">${p.cat}</span>
+                <div class="card-title">${p.title}</div>
+                <div class="card-text" title="Нажми, чтобы скопировать">${p.text}</div>
+                <button class="copy-btn">Копировать</button>
+            `;
+
+            const btn = card.querySelector('.copy-btn');
+            const textZone = card.querySelector('.card-text');
+            
+            const copyHandler = () => {
+                navigator.clipboard.writeText(p.text);
+                btn.innerText = 'Скопировано!';
+                btn.style.background = 'var(--success)';
+                setTimeout(() => {
+                    btn.innerText = 'Копировать';
+                    btn.style.background = 'var(--accent)';
+                }, 1500);
+            };
+
+            btn.addEventListener('click', copyHandler);
+            textZone.addEventListener('click', copyHandler);
+
+            grid.appendChild(card);
+        });
+    }
+
+    searchInput.addEventListener('input', render);
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            filterBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            render();
+        });
+    });
+
+    render();
+</script>
+
+</body>
+</html>
